@@ -1,28 +1,26 @@
+// models/productModel.js
 const mongoose = require('mongoose');
 
-// Define el esquema del producto
 const productSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true, // Indica que el campo es obligatorio
-        trim: true // Elimina espacios en blanco al principio y al final del nombre
+        required: true,
+        trim: true
     },
     price: {
         type: Number,
         required: true,
-        min: 0 // Precio no puede ser negativo
+        min: 0
     },
     description: String,
     category: {
         type: String,
-        enum: ['Electronics', 'Clothing', 'Books', 'Other'] // Asegura que la categoría sea una de las opciones especificadas
+        enum: ['Electronics', 'Clothing', 'Books', 'Other']
     },
-    // Otros campos que puedas necesitar
 }, {
-    timestamps: true // Añade campos de tiempo: createdAt y updatedAt
+    timestamps: true
 });
 
-// Crea el modelo 'Product' basado en el esquema
 const Product = mongoose.model('Product', productSchema);
 
 module.exports = Product;

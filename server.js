@@ -1,12 +1,10 @@
-// server.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
 const Product = require('./models/productModel');
 
-
-require('dotenv').config(); // Cargar variables de entorno desde .env
+require('dotenv').config();
 
 const app = express();
 const port = 8008;
@@ -31,9 +29,16 @@ db.once('open', () => {
 // Configurar body-parser
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+// Ruta para mostrar la página principal con productos
 app.get('/', async (req, res) => {
-    const products = await Product.find();
-    res.render('products', { products });
+    try {
+        const products = await Product.find();
+        res.render('products', { products });
+    } catch (error) {
+        console.error('Error al obtener productos:', error.message);
+        res.status(500).send('Error interno del servidor');
+    }
 });
 
 // Ruta para mostrar la página de agregar producto
@@ -43,31 +48,27 @@ app.get('/add-product', (req, res) => {
 
 // Ruta para procesar la adición de un nuevo producto
 app.post('/add-product', async (req, res) => {
-    // Obtener los datos del formulario desde la solicitud
     const { productName, productPrice } = req.body;
 
-    // Aquí deberías agregar lógica para guardar el producto en tu base de datos
-    // Utilizando mongoose o el método que prefieras
+    // Validar que se proporcionen los datos necesarios
+    if (!productName || !productPrice) {
+        return res.status(400).send('Nombre y precio del producto son obligatorios');
+    }
 
-    // Ejemplo con mongoose
-    const Product = require('../models/productModel');
-
+    // Crear un nuevo producto con los datos recibidos
     const newProduct = new Product({
         name: productName,
         price: productPrice,
-        // Otros campos según tus necesidades
+        // Puedes agregar otros campos aquí según tus necesidades
     });
 
     try {
         // Guardar el nuevo producto en la base de datos
         await newProduct.save();
-
-        // Redirigir al usuario a la página de éxito o a otra vista
-        res.redirect('/success-page');
+        res.redirect('/success-page'); // Redirigir al usuario a la página de éxito
     } catch (error) {
         console.error('Error al agregar el producto:', error.message);
-        // Manejar el error y redirigir al usuario a una página de error o a otra vista
-        res.redirect('/error-page');
+        res.redirect('/error-page'); // Redirigir al usuario a la página de error en caso de fallo
     }
 });
 

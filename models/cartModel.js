@@ -1,13 +1,13 @@
+// models/cartModel.js
 const mongoose = require('mongoose');
 
 const cartSchema = new mongoose.Schema({
-    products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }], // Referencia a productos en el carrito
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Referencia al usuario que posee el carrito
-    totalAmount: { type: Number, default: 0 }, // Monto total del carrito
-    status: { type: String, enum: ['active', 'completed'], default: 'active' }, // Estado del carrito (activo o completado)
-    // Otros campos que puedas necesitar
+    products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    totalAmount: { type: Number, default: 0 },
+    status: { type: String, enum: ['active', 'completed'], default: 'active' },
 }, {
-    timestamps: true // Añade campos de tiempo: createdAt y updatedAt
+    timestamps: true
 });
 
 const Cart = mongoose.model('Cart', cartSchema);
