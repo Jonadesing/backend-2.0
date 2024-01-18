@@ -1,0 +1,30 @@
+<!-- views/realtime.handlebars -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vista en Tiempo Real</title>
+</head>
+<body>
+  <h1>Vista en Tiempo Real</h1>
+  <ul id="product-list"></ul>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    // Escuchar eventos de actualización de productos
+    socket.on('updateProducts', (products) => {
+      const productList = document.getElementById('product-list');
+      productList.innerHTML = '';
+
+      products.forEach((product) => {
+        const listItem = document.createElement('li');
+        listItem.textContent = product.name;
+        productList.appendChild(listItem);
+      });
+    });
+  </script>
+</body>
+</html>
