@@ -17,7 +17,9 @@ app.set('view engine', 'handlebars');
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    ssl: true
 });
+
 
 const db = mongoose.connection;
 

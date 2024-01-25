@@ -1,21 +1,40 @@
 const express = require('express');
 const router = express.Router();
-const productController = require('../controllers/productController');
+const Product = require('../models/productModel');
 
-// Endpoint para obtener todos los productos con paginación y filtros
-router.get('/', productController.getProducts);
+router.get('/', async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.render('products', { products });
+  } catch (error) {
+    console.error('Error al obtener productos:', error.message);
+    res.status(500).send('Error interno del servidor');
+  }
+});
 
-// Endpoint para obtener un producto por su ID
-router.get('/:productId', productController.getProductById);
+router.get('/add-product', (req, res) => {
+  res.render('add-product');
+});
 
-// Endpoint para agregar un nuevo producto
-router.post('/', productController.addProduct);
+router.post('/add-product', async (req, res) => {
+  const { productName, productPrice } = req.body;
 
-// Endpoint para actualizar un producto por su ID
-router.put('/:productId', productController.updateProduct);
+  if (!productName || !productPrice) {
+    return res.status(400).send('Nombre y precio del producto son obligatorios');
+  }
 
-// Endpoint para eliminar un producto por su ID
-router.delete('/:productId', productController.deleteProduct);
+  const newProduct = new Product({
+    name: productName,
+    price: productPrice,
+  });
+
+  try {
+    await newProduct.save();
+    res.redirect('/success-page');
+  } catch (error) {
+    console.error('Error al agregar el producto:', error.message);
+    res.redirect('/error-page');
+  }
+});
 
 module.exports = router;
-

@@ -1,10 +1,10 @@
 {
   "name": "proyecto-backend-2.0",
   "version": "1.0.0",
-  "description": "",
   "main": "ProductManager.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -19,5 +19,7 @@
     "mongodb": "^6.3.0",
     "mongoose": "^8.1.0",
     "socket.io": "^4.7.4"
-  }
+  },
+  "devDependencies": {},
+  "description": ""
 }
