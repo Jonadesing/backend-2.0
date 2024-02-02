@@ -2,7 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const exphbs = require('express-handlebars');
 const mongoose = require('mongoose');
-const Product = require('./models/productModel');
+const session = require('express-session');
+const LocalStrategy = require('passport-local').Strategy;
+const GitHubStrategy = require('passport-github').Strategy; 
+const passport = require('passport');
+const bcrypt = require('bcrypt');
+const User = require('./models/userModel'); // Asegúrate de tener un modelo de usuario (userModel.js)
 
 require('dotenv').config();
 
@@ -20,13 +25,74 @@ mongoose.connect(process.env.MONGO_URI, {
     ssl: true
 });
 
-
 const db = mongoose.connection;
 
 db.on('error', console.error.bind(console, 'Error de conexión a MongoDB:'));
 db.once('open', () => {
     console.log('Conectado a MongoDB');
 });
+
+// Configurar body-parser
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// Configurar express-session
+app.use(session({
+    secret: 'tu_secreto',
+    resave: false,
+    saveUninitialized: false
+}));
+
+// Inicializar Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Configurar la estrategia local de Passport
+passport.use(new LocalStrategy(async (username, password, done) => {
+    try {
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return done(null, false, { message: 'Usuario no encontrado' });
+        }
+
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        if (!passwordMatch) {
+            return done(null, false, { message: 'Contraseña incorrecta' });
+        }
+
+        return done(null, user);
+    } catch (error) {
+        return done(error);
+    }
+}));
+
+// Serializar y deserializar usuarios para la sesión
+passport.serializeUser((user, done) => {
+    done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+    try {
+        const user = await User.findById(id);
+        done(null, user);
+    } catch (error) {
+        done(error);
+    }
+});
+
+// Ruta para mostrar la página de inicio de sesión
+app.get('/login', (req, res) => {
+    res.render('login');
+});
+
+// Ruta para procesar el inicio de sesión
+app.post('/login', passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/login',
+    failureFlash: true
+}));
 
 // Configurar body-parser
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -42,11 +108,32 @@ app.get('/', async (req, res) => {
         res.status(500).send('Error interno del servidor');
     }
 });
-
+// Manejo de errores
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Error interno del servidor');
+});
 // Ruta para mostrar la página de agregar producto
 app.get('/add-product', (req, res) => {
     res.render('add-product');
 });
+
+passport.use(new GitHubStrategy(
+    {
+        clientID: 'TUCOMITENIDODEGITHUB',
+        clientSecret: 'TUCOMITENSECRETODEGITHUB',
+        callbackURL: 'http://localhost:8008/auth/github/callback'
+    },
+    (accessToken, refreshToken, profile, done) => {
+        // Aquí puedes acceder a la información del usuario a través de 'profile'
+        const  githubUsername = profile.username;
+        const githubEmail = profile.emails ? profile.emails[0].value : null;
+
+        
+
+        return done(null, profile);
+    }
+));
 
 // Ruta para procesar la adición de un nuevo producto
 app.post('/add-product', async (req, res) => {
@@ -74,7 +161,8 @@ app.post('/add-product', async (req, res) => {
     }
 });
 
-// Manejar conexiones de Socket.io (si es necesario)
+// Manejar conexiones de Socket.io 
+app.set('env', 'development'); // Configura el entorno a desarrollo
 
 const server = app.listen(port, () => {
     console.log(`Servidor escuchando en http://localhost:${port}`);
