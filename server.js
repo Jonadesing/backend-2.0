@@ -1,3 +1,4 @@
+// Importación de módulos necesarios
 const express = require('express');
 const bodyParser = require('body-parser');
 const exphbs = require('express-handlebars');
@@ -6,45 +7,63 @@ const session = require('express-session');
 const LocalStrategy = require('passport-local').Strategy;
 const passport = require('passport');
 const bcrypt = require('bcrypt');
-const User = require('./models/userModel'); 
+const User = require('./models/userModel');
 const Ticket = require('./models/ticketModel');
-const Product = require('./models/productModel'); 
+const Product = require('./models/productModel');
 
+// Configuración de variables de entorno
 require('dotenv').config();
 
+// Creación de la aplicación Express
 const app = express();
-const port = 8009;
+const port = 8008;
 
-// Configurar Handlebars como el motor de vistas
+// Configuración de bodyParser para manejar JSON y datos de formulario
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Ruta para el registro de sesiones
+app.post('/api/sessions/register', (req, res) => {
+    // Lógica para registrar sesiones
+    // Esto podría incluir la creación de una sesión para el usuario
+    res.send('Registro de sesión exitoso');
+});
+
+// Middleware de autorización para verificar el rol del usuario
+const authorize = (role) => (req, res, next) => {
+    if (req.user && req.user.role === role) {
+        next();
+    } else {
+        res.status(403).send('Acceso prohibido');
+    }
+};
+
+// Configuración de Handlebars como el motor de vistas
 app.engine('handlebars', exphbs());
 app.set('view engine', 'handlebars');
 
+// Conexión a la base de datos MongoDB
 mongoose.connect(process.env.MONGO_URI);
-
-
 const db = mongoose.connection;
 
+// Manejo de errores de conexión a MongoDB
 db.on('error', console.error.bind(console, 'Error de conexión a MongoDB:'));
 db.once('open', () => {
     console.log('Conectado a MongoDB');
 });
 
-// Configurar body-parser
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-// Configurar express-session
+// Configuración de express-session
 app.use(session({
     secret: 'tu_secreto',
     resave: false,
     saveUninitialized: false
 }));
 
-// Inicializar Passport
+// Inicialización de Passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Configurar la estrategia local de Passport
+// Configuración de la estrategia local de Passport para el inicio de sesión
 passport.use(new LocalStrategy(async (username, password, done) => {
     try {
         const user = await User.findOne({ username });
@@ -65,7 +84,7 @@ passport.use(new LocalStrategy(async (username, password, done) => {
     }
 }));
 
-// Serializar y deserializar usuarios para la sesión
+// Serialización y deserialización de usuarios para la sesión
 passport.serializeUser((user, done) => {
     done(null, user.id);
 });
@@ -78,15 +97,6 @@ passport.deserializeUser(async (id, done) => {
         done(error);
     }
 });
-
-// Middleware de autorización para verificar el rol del usuario
-const authorize = (role) => (req, res, next) => {
-    if (req.user && req.user.role === role) {
-        next();
-    } else {
-        res.status(403).send('Acceso prohibido');
-    }
-};
 
 // Ruta para mostrar la página de inicio de sesión
 app.get('/login', (req, res) => {
@@ -115,7 +125,16 @@ app.get('/', async (req, res) => {
 app.get('/carts/:cid/purchase', authorize('user'), async (req, res) => {
     try {
         // Lógica para finalizar la compra y generar un ticket
-        // ...
+        const ticket = new Ticket({
+            userId: req.user._id,
+            cartId: req.params.cid,
+            products: req.session.cart.products
+        });
+        await ticket.save();
+
+        // Limpiar el carrito después de la compra
+        req.session.cart = null;
+
         res.status(200).send('Compra finalizada con éxito');
     } catch (error) {
         console.error('Error al finalizar la compra:', error.message);
@@ -123,16 +142,18 @@ app.get('/carts/:cid/purchase', authorize('user'), async (req, res) => {
     }
 });
 
-// Manejo de errores
+// Ruta para mostrar la página de agregar producto
+app.get('/add-product', (req, res) => {
+    res.render('add-product');
+});
+
+// Manejo de errores global
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Error interno del servidor');
 });
 
+// Iniciar el servidor
 const server = app.listen(port, () => {
     console.log(`Servidor escuchando en http://localhost:${port}`);
-});
-// Ruta para mostrar la página de agregar producto
-app.get('/add-product', (req, res) => {
-    res.render('add-product');
 });
