@@ -24,8 +24,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Ruta para el registro de sesiones
 app.post('/api/sessions/register', (req, res) => {
-    // Lógica para registrar sesiones
-    // Esto podría incluir la creación de una sesión para el usuario
+
     res.send('Registro de sesión exitoso');
 });
 
