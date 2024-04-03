@@ -1,4 +1,3 @@
-// models/productModel.js
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
@@ -17,6 +16,11 @@ const productSchema = new mongoose.Schema({
         type: String,
         enum: ['Electronics', 'Clothing', 'Books', 'Other']
     },
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User', // Referencia al modelo de usuario
+        required: true
+    }
 }, {
     timestamps: true
 });

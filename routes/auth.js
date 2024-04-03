@@ -3,12 +3,12 @@ const passport = require('passport');
 const router = express.Router();
 
 // Ruta para mostrar el formulario de login
-router.get('/login,handlebars', (req, res) => {
+router.get('/login.handlebars', (req, res) => {
     res.render('login.handlebars');
 });
 
 // Ruta para procesar el login
-router.post('/login,handlebars', passport.authenticate('local', {
+router.post('/login.handlebars', passport.authenticate('local', {
     successRedirect: '/dashboard',  // Redirigir en caso de éxito
     failureRedirect: '/login.handlebars',       // Redirigir en caso de fallo
     failureFlash: true,

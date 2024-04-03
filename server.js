@@ -24,7 +24,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Ruta para el registro de sesiones
 app.post('/api/sessions/register', (req, res) => {
-
+    const { _id, username, email } = req.user;
+    // Almacenar la información del usuario en la sesión
+    req.session.userId = _id;
+    req.session.username = username;
+    req.session.email = email;
     res.send('Registro de sesión exitoso');
 });
 
