@@ -1,4 +1,3 @@
-// Importación de módulos necesarios
 const express = require('express');
 const bodyParser = require('body-parser');
 const exphbs = require('express-handlebars');
@@ -10,6 +9,7 @@ const bcrypt = require('bcrypt');
 const User = require('./models/userModel');
 const Ticket = require('./models/ticketModel');
 const Product = require('./models/productModel');
+const { specs, swaggerUi } = require('./swaggerConfig'); // Importa las especificaciones y Swagger UI
 
 // Configuración de variables de entorno
 require('dotenv').config();
@@ -21,25 +21,6 @@ const port = 8008;
 // Configuración de bodyParser para manejar JSON y datos de formulario
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
-// Ruta para el registro de sesiones
-app.post('/api/sessions/register', (req, res) => {
-    const { _id, username, email } = req.user;
-    // Almacenar la información del usuario en la sesión
-    req.session.userId = _id;
-    req.session.username = username;
-    req.session.email = email;
-    res.send('Registro de sesión exitoso');
-});
-
-// Middleware de autorización para verificar el rol del usuario
-const authorize = (role) => (req, res, next) => {
-    if (req.user && req.user.role === role) {
-        next();
-    } else {
-        res.status(403).send('Acceso prohibido');
-    }
-};
 
 // Configuración de Handlebars como el motor de vistas
 app.engine('handlebars', exphbs());
@@ -101,9 +82,14 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
-// Ruta para mostrar la página de inicio de sesión
-app.get('/login', (req, res) => {
-    res.render('login');
+// Ruta para el registro de sesiones
+app.post('/api/sessions/register', (req, res) => {
+    const { _id, username, email } = req.user;
+    // Almacenar la información del usuario en la sesión
+    req.session.userId = _id;
+    req.session.username = username;
+    req.session.email = email;
+    res.send('Registro de sesión exitoso');
 });
 
 // Ruta para procesar el inicio de sesión
@@ -150,7 +136,10 @@ app.get('/add-product', (req, res) => {
     res.render('add-product');
 });
 
-// Manejo de errores global
+// Middleware para servir la documentación Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
+// Middleware de manejo de errores global
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Error interno del servidor');
