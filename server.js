@@ -9,14 +9,14 @@ const bcrypt = require('bcrypt');
 const User = require('./models/userModel');
 const Ticket = require('./models/ticketModel');
 const Product = require('./models/productModel');
-const { specs, swaggerUi } = require('./swaggerConfig'); // Importa las especificaciones y Swagger UI
+const { specs, swaggerUi } = require('./swaggerConfig');
 
 // Configuración de variables de entorno
 require('dotenv').config();
 
 // Creación de la aplicación Express
 const app = express();
-const port = 8008;
+const port = process.env.PORT || 8008;
 
 // Configuración de bodyParser para manejar JSON y datos de formulario
 app.use(bodyParser.json());
@@ -27,7 +27,7 @@ app.engine('handlebars', exphbs());
 app.set('view engine', 'handlebars');
 
 // Conexión a la base de datos MongoDB
-mongoose.connect(process.env.MONGO_URI);
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 const db = mongoose.connection;
 
 // Manejo de errores de conexión a MongoDB
@@ -38,7 +38,7 @@ db.once('open', () => {
 
 // Configuración de express-session
 app.use(session({
-    secret: 'tu_secreto',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false
 }));
@@ -61,6 +61,10 @@ passport.use(new LocalStrategy(async (username, password, done) => {
         if (!passwordMatch) {
             return done(null, false, { message: 'Contraseña incorrecta' });
         }
+
+        // Actualizar la última conexión del usuario
+        user.last_connection = new Date();
+        await user.save();
 
         return done(null, user);
     } catch (error) {
@@ -91,13 +95,6 @@ app.post('/api/sessions/register', (req, res) => {
     req.session.email = email;
     res.send('Registro de sesión exitoso');
 });
-
-// Ruta para procesar el inicio de sesión
-app.post('/login', passport.authenticate('local', {
-    successRedirect: '/',
-    failureRedirect: '/login',
-    failureFlash: true
-}));
 
 // Ruta para mostrar la página principal con productos
 app.get('/', async (req, res) => {
@@ -134,6 +131,27 @@ app.get('/carts/:cid/purchase', authorize('user'), async (req, res) => {
 // Ruta para mostrar la página de agregar producto
 app.get('/add-product', (req, res) => {
     res.render('add-product');
+});
+
+// Ruta para cambiar el rol de un usuario a "premium" o "user"
+app.put('/api/users/:uid/role', async (req, res) => {
+    const { uid } = req.params;
+    const { role } = req.body;
+
+    try {
+        const user = await User.findById(uid);
+        if (!user) {
+            return res.status(404).send('Usuario no encontrado');
+        }
+
+        user.role = role;
+        await user.save();
+
+        res.status(200).send(`Rol de usuario actualizado a ${role}`);
+    } catch (error) {
+        console.error('Error al actualizar el rol del usuario:', error.message);
+        res.status(500).send('Error interno del servidor');
+    }
 });
 
 // Middleware para servir la documentación Swagger UI
