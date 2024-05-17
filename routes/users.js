@@ -1,81 +1,70 @@
+// userRoutes.js
+
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
 const User = require('../models/userModel');
+const nodemailer = require('nodemailer');
 
-// Configuración de Multer para guardar archivos en carpetas específicas
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        let folder;
-        if (file.fieldname === 'profileImage') {
-            folder = 'profiles';
-        } else if (file.fieldname === 'productImage') {
-            folder = 'products';
-        } else {
-            folder = 'documents';
-        }
-        cb(null, `uploads/${folder}`);
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
-
-const upload = multer({ storage });
-
-// Endpoint POST para subir documentos
-router.post('/:uid/documents', upload.array('documents'), async (req, res) => {
-    const { uid } = req.params;
-    const uploadedFiles = req.files;
-
+// Ruta para obtener todos los usuarios (solo datos principales)
+router.get('/', async (req, res) => {
     try {
-        const user = await User.findById(uid);
-        if (!user) {
-            return res.status(404).send('Usuario no encontrado');
-        }
-
-        uploadedFiles.forEach(file => {
-            user.documents.push({
-                name: file.originalname,
-                reference: `/uploads/documents/${file.filename}`,
-                type: file.fieldname
-            });
-        });
-
-        await user.save();
-        res.status(200).send('Documentos subidos correctamente');
+        const users = await User.find({}, { name: 1, email: 1, role: 1 });
+        res.json(users);
     } catch (error) {
-        console.error('Error al subir documentos:', error.message);
+        console.error('Error al obtener usuarios:', error.message);
         res.status(500).send('Error interno del servidor');
     }
 });
 
-// Endpoint para actualizar a usuario premium
-router.put('/premium/:uid', async (req, res) => {
-    const { uid } = req.params;
+// Ruta para eliminar usuarios inactivos
+router.delete('/', async (req, res) => {
+    try {
+        const cutoffTime = new Date(Date.now() - 30 * 60 * 1000); // Últimos 30 minutos (para propósitos de prueba)
+        const deletedUsers = await User.deleteMany({ last_connection: { $lt: cutoffTime } });
+        
+        // Enviar correo electrónico a los usuarios eliminados por inactividad
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: 'tu_correo@gmail.com',
+                pass: 'tu_contraseña'
+            }
+        });
+
+        const emails = deletedUsers.map(user => user.email);
+        const mailOptions = {
+            from: 'tu_correo@gmail.com',
+            to: emails,
+            subject: 'Cuenta eliminada por inactividad',
+            text: 'Tu cuenta ha sido eliminada debido a la inactividad. Por favor, contáctanos si tienes alguna pregunta.'
+        };
+
+        await transporter.sendMail(mailOptions);
+        
+        res.send(`Se eliminaron ${deletedUsers.deletedCount} usuarios inactivos`);
+    } catch (error) {
+        console.error('Error al eliminar usuarios inactivos:', error.message);
+        res.status(500).send('Error interno del servidor');
+    }
+});
+
+// Ruta para subir documentos a un usuario específico
+router.post('/:uid/documents', async (req, res) => {
+    const userId = req.params.uid;
+    const documents = req.body.documents;
 
     try {
-        const user = await User.findById(uid);
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).send('Usuario no encontrado');
         }
 
-        // Verificar si el usuario ha cargado los documentos requeridos
-        const requiredDocuments = ['ID', 'ProofOfAddress', 'BankStatement'];
-        const uploadedDocuments = user.documents.map(doc => doc.type);
+        user.documents = documents;
+        await user.save();
 
-        const hasAllRequiredDocuments = requiredDocuments.every(doc => uploadedDocuments.includes(doc));
-
-        if (hasAllRequiredDocuments) {
-            user.role = 'premium';
-            await user.save();
-            res.status(200).send('Usuario actualizado a premium');
-        } else {
-            res.status(400).send('El usuario debe cargar todos los documentos requeridos');
-        }
+        res.send('Documentos actualizados correctamente');
     } catch (error) {
-        console.error('Error al actualizar el usuario a premium:', error.message);
+        console.error('Error al subir documentos:', error.message);
         res.status(500).send('Error interno del servidor');
     }
 });

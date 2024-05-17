@@ -6,27 +6,23 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    email: {
+        type: String,
+        required: true,
+        unique: true
+    },
     password: {
         type: String,
         required: true
     },
-    role: {
+    name: {
         type: String,
-        enum: ['user', 'premium'],
-        default: 'user'
-    },
-    documents: [{
-        name: String,
-        reference: String,
-        type: {
-            type: String,
-            enum: ['ID', 'ProofOfAddress', 'BankStatement']
-        }
-    }],
-    last_connection: {
-        type: Date,
-        default: Date.now
+        required: false
     }
+}, {
+    timestamps: true // Habilita el registro automático de timestamps (createdAt, updatedAt)
 });
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;

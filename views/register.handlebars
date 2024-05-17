@@ -1,0 +1,12 @@
+<!-- Archivo: views/register.handlebars -->
+
+<div class="container-fluid bg-light">
+    <h1>{{ pageTitle }}</h1>
+    <!-- Formulario de registro -->
+    <form action="/registro" method="POST">
+        <input type="text" name="username" placeholder="Nombre de usuario" required>
+        <input type="email" name="email" placeholder="Correo electrónico" required>
+        <input type="password" name="password" placeholder="Contraseña" required>
+        <button class="btn btn-primary" type="submit">Registrarse</button>
+    </form>
+</div>

@@ -1,15 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de Usuario</title>
-</head>
-<body>
-    <h1>Perfil de Usuario</h1>
-    <p>Nombre: {{first_name}} {{last_name}}</p>
-    <p>Email: {{email}}</p>
-    <p>Edad: {{age}}</p>
-    <a href="/api/sessions/logout">Cerrar Sesión</a>
-</body>
-</html>
+<!-- Archivo: views/profile.handlebars -->
+
+<div class="container">
+    <h1>{{ pageTitle }}</h1>
+    <h2>Perfil de Usuario</h2>
+    <p>Nombre: {{ user.name }}</p>
+    <p>Correo Electrónico: {{ user.email }}</p>
+    <p>Rol: {{ user.role }}</p>
+    <!-- Aquí puedes mostrar más información del perfil del usuario -->
+</div>
