@@ -30,4 +30,8 @@ router.get('/perfil', (req, res) => {
     res.render('profile', { pageTitle: 'Perfil de Usuario', user: req.user });
 });
 
+router.get('/carrito', (req, res) => {
+    res.render('cart', { pageTitle: 'Carro de compras', user: req.user });
+});
+
 module.exports = router;

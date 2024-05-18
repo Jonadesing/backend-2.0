@@ -2,36 +2,37 @@
   {
     "id": 1,
     "name": "Producto Actualizado",
-    "price": 25
+    "price": 25,
+    "imageUrl": "/public/archivos.img/producto1.jpg"
   },
   {
-    "id": 1,
+    "id": 2,
     "name": "Producto A",
-    "price": 20
+    "price": 20,
+    "imageUrl": "/public/archivos.img/at-lp60xhp-gm_01.png"
   },
   {
-    "id": 1,
-    "name": "Producto A",
-    "price": 20
+    "id": 3,
+    "name": "Producto B",
+    "price": 30,
+    "imageUrl": "/public/archivos.img/producto3.jpg"
   },
   {
-    "id": 1,
-    "name": "Producto A",
-    "price": 20
+    "id": 4,
+    "name": "Producto C",
+    "price": 15,
+    "imageUrl": "/public/archivos.img/producto4.jpg"
   },
   {
-    "id": 1,
-    "name": "Producto A",
-    "price": 20
+    "id": 5,
+    "name": "Producto D",
+    "price": 18,
+    "imageUrl": "/public/archivos.img/producto5.jpg"
   },
   {
-    "id": 1,
-    "name": "Producto A",
-    "price": 20
-  },
-  {
-    "id": 1,
-    "name": "Producto A",
-    "price": 20
+    "id": 5,
+    "name": "Producto D",
+    "price": 18,
+    "imageUrl": "/archivos.img/atr2500x-usb_01.png"
   }
 ]

@@ -3,7 +3,7 @@
 body {
     margin: 0;
     padding: 0;
-    background-color: #d3f387;
+    background-color: rgb(253, 246, 184);
     
 }
 
@@ -45,7 +45,7 @@ body {
 }
 
 .buy-button {
-    background-color: #007bff;
+    background-color: orangered;
     color: #fff;
     border: none;
     border-radius: 4px;
@@ -54,26 +54,27 @@ body {
     cursor: pointer;
     margin-top: 12px;
 }
-.hero{
-    background-color: #007bff;
-}
 
-/* Estilos para el hero */
-.hero {
-    background-image: url();
+
+
+.hero{
+    background-image: linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)) ,url(/archivos.img/AT-LP60XBT_lifestyle_banner_desktop-2000x1000.jpg);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
     padding: 80px 0;
     text-align: center;
+    color: white;
 }
 
 .hero h1 {
     font-size: 3rem;
-    color: #333;
     margin-bottom: 20px;
 }
 
 .hero p {
     font-size: 1.5rem;
-    color: #666;
+    color: orange;
     margin-bottom: 40px;
 }
 
@@ -81,19 +82,26 @@ body {
     display: inline-block;
     padding: 12px 24px;
     font-size: 1.2rem;
-    background-color: #007bff;
+    background-color: orangered;
     color: #fff;
     text-decoration: none;
-    border-radius: 5px;
+    border-radius: none;
 }
 
 .hero .btn:hover {
-    background-color: orangered;
+    background-color:white;
+    color: orangered;
 }
 /* styles.css */
+.wrapper {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+}
+
 
 .footer {
-    background-color: #333;
+    background-color: black;
     color: #fff;
     padding: 40px 0;
 }
@@ -123,6 +131,8 @@ body {
 .footer p {
     margin-bottom: 10px;
 }
+
+
 /* Estilos para el contenedor de tarjetas de producto */
 .product-card-container {
     display: flex;
@@ -134,14 +144,14 @@ body {
 /* Estilos para cada tarjeta de producto */
 .product-card {
     width: 300px; /* Ancho de cada tarjeta */
-    border: 1px solid #ddd;
+    border: none;
     border-radius: 8px;
     overflow: hidden;
 }
 
 .product-image img {
     width: 100%; /* La imagen ocupa todo el ancho de la tarjeta */
-    height: 200px; /* Altura fija para la imagen */
+    height: 100%; /* Altura fija para la imagen */
     object-fit: cover;
 }
 
@@ -176,15 +186,17 @@ body {
 .btn-add-to-cart {
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #007bff;
+    background-color: orangered;
     color: #fff;
-    border: none;
+    border: white;
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
 
 .btn-add-to-cart:hover {
-    background-color: #0056b3; /* Cambio de color al pasar el mouse */
+    background-color: white;
+    color: orangered; /* Cambio de color al pasar el mouse */
+    border: orangered;
 }
 

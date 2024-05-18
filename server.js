@@ -31,6 +31,8 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
+// Configurar Express para servir archivos estáticos desde la carpeta 'public'
+app.use(express.static('public'));
 
 // Configuración de connect-flash
 app.use(flash());
@@ -77,7 +79,6 @@ app.post('/registro', async (req, res) => {
         res.redirect('/registro'); // Redirigir de nuevo al formulario de registro en caso de error
     }
 });
-
 
 // Configuración de connect-flash para mensajes flash
 app.use(flash());
@@ -135,7 +136,41 @@ passport.deserializeUser(async (id, done) => {
 
 // Rutas
 const routes = require('./routes/routes'); // Define tus rutas en un archivo separado
+const userRouter = require('./routes/userRouter'); // Importar el router de usuarios
 app.use('/', routes);
+app.use('/api/users', userRouter); // Usar el router de usuarios
+
+// Ruta para mostrar la lista de productos
+app.get('/productos', async (req, res) => {
+    try {
+        const productos = await Product.find();
+        res.render('products', { pageTitle: 'Lista de Productos', products: productos });
+    } catch (error) {
+        console.error('Error al obtener los productos:', error);
+        res.status(500).send('Error interno del servidor');
+    }
+});
+
+// Ruta para agregar un producto al carrito
+app.post('/api/cart/add/:productId', async (req, res) => {
+    const productId = req.params.productId;
+    try {
+        // Encontrar al usuario actual (por ejemplo, a través de la sesión)
+        const currentUser = req.user;
+        if (!currentUser) {
+            return res.status(401).send('Usuario no autorizado');
+        }
+        // Agregar el ID del producto al carrito del usuario en la base de datos
+        currentUser.cart.push(productId);
+        await currentUser.save();
+        // Enviar una respuesta de éxito
+        res.sendStatus(200);
+    } catch (error) {
+        console.error('Error al agregar el producto al carrito:', error);
+        res.status(500).send('Error interno del servidor');
+    }
+});
+
 
 // Middleware para manejar errores
 app.use((err, req, res, next) => {
@@ -155,10 +190,6 @@ const db = mongoose.connection;
 db.on('error', (err) => {
     console.error('Error de conexión a MongoDB:', err);
 });
-
-// Configurar Express para servir archivos estáticos
-app.use(express.static('public'));
-
 
 // Conexión exitosa a MongoDB
 db.once('open', () => {
