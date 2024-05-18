@@ -3,7 +3,7 @@
 body {
     margin: 0;
     padding: 0;
-    background-color: rgb(253, 246, 184);
+    background-color: lightgoldenrodyellow;
     
 }
 
@@ -200,3 +200,26 @@ body {
     border: orangered;
 }
 
+
+.producto1{
+    position: absolute;
+    width: 295px;
+    height: 291px;
+    left: 87px;
+    top: 826px;
+}
+.producto2{
+    position: absolute;
+    width: 290px;
+    height: 291px;
+    left: 575px;
+    top: 826px;
+}
+.producto3{
+    position: absolute;
+    width: 351px;
+    height: 280px;
+    left: 1018px;
+    top: 826px;
+    
+}

@@ -3,31 +3,31 @@
     "id": 1,
     "name": "Producto Actualizado",
     "price": 25,
-    "imageUrl": "/public/archivos.img/producto1.jpg"
+    "imageUrl": "/archivos.img/ath-cks5tw_01.png"
   },
   {
     "id": 2,
     "name": "Producto A",
     "price": 20,
-    "imageUrl": "/public/archivos.img/at-lp60xhp-gm_01.png"
+    "imageUrl": "/archivos.img/at-lp60xhp-gm_01.png"
   },
   {
     "id": 3,
     "name": "Producto B",
     "price": 30,
-    "imageUrl": "/public/archivos.img/producto3.jpg"
+    "imageUrl": "/archivos.img/ath-s220btbk_01_1.png"
   },
   {
     "id": 4,
     "name": "Producto C",
     "price": 15,
-    "imageUrl": "/public/archivos.img/producto4.jpg"
+    "imageUrl": "/archivos.img/at-lp60xbt_01.png"
   },
   {
     "id": 5,
     "name": "Producto D",
     "price": 18,
-    "imageUrl": "/public/archivos.img/producto5.jpg"
+    "imageUrl": "/archivos.img/at2005usbpk_01.png"
   },
   {
     "id": 5,
