@@ -1,70 +1,69 @@
-// controllers/cartController.js
-const Cart = require('../models/cartModel');
+const express = require('express');
+const router = express.Router();
+const CartManager = require('../managers/cartManager');
 
-exports.updateCart = async (req, res, next) => {
-    const { cid } = req.params;
-    const { products } = req.body;
-
+// Ruta para obtener el conteo del carrito
+router.get('/count', async (req, res) => {
     try {
-        const cart = await Cart.findById(cid);
-
-        if (!cart) {
-            return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
-        }
-
-        cart.products = products;
-        cart.totalAmount = calculateTotalAmount(products);
-        await cart.save();
-
-        res.status(200).json({ status: 'success', message: 'Carrito actualizado exitosamente', cart });
+        const cart = await CartManager.getCartById(req.user.cartId);
+        const count = cart ? cart.products.reduce((acc, item) => acc + item.quantity, 0) : 0;
+        res.json({ count });
     } catch (error) {
-        console.error('Error al actualizar el carrito:', error);
-        res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+        console.error('Error al obtener el conteo del carrito:', error);
+        res.status(500).send('Error interno del servidor');
     }
-};
+});
 
-exports.deleteProductFromCart = async (req, res, next) => {
-    const { cid, pid } = req.params;
-
+// Ruta para agregar un producto al carrito
+router.post('/add/:productId', async (req, res) => {
     try {
-        const cart = await Cart.findById(cid);
-
-        if (!cart) {
-            return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
+        const cart = await CartManager.getCartById(req.user.cartId);
+        if (cart) {
+            const productIndex = cart.products.findIndex(p => p.productId.toString() === req.params.productId);
+            if (productIndex > -1) {
+                cart.products[productIndex].quantity += 1;
+            } else {
+                cart.products.push({ productId: req.params.productId, quantity: 1 });
+            }
+            await cart.save();
+        } else {
+            const newCart = await CartManager.addCart({
+                userId: req.user._id,
+                products: [{ productId: req.params.productId, quantity: 1 }]
+            });
+            req.user.cartId = newCart._id;
+            await req.user.save();
         }
-
-        cart.products = cart.products.filter(productId => productId.toString() !== pid);
-        cart.totalAmount = calculateTotalAmount(cart.products);
-        await cart.save();
-
-        res.status(200).json({ status: 'success', message: 'Producto eliminado del carrito', cart });
+        res.sendStatus(200);
     } catch (error) {
-        console.error('Error al eliminar producto del carrito:', error);
-        res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+        console.error('Error al agregar el producto al carrito:', error);
+        res.status(500).send('Error interno del servidor');
     }
-};
+});
 
-exports.clearCart = async (req, res, next) => {
-    const { cid } = req.params;
-
+// Ruta para quitar un producto del carrito
+router.post('/remove/:productId', async (req, res) => {
     try {
-        const cart = await Cart.findById(cid);
-
-        if (!cart) {
-            return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' });
+        const cart = await CartManager.getCartById(req.user.cartId);
+        if (cart) {
+            const productIndex = cart.products.findIndex(p => p.productId.toString() === req.params.productId);
+            if (productIndex > -1) {
+                cart.products[productIndex].quantity -= 1;
+                if (cart.products[productIndex].quantity <= 0) {
+                    cart.products.splice(productIndex, 1);
+                }
+                await cart.save();
+                res.sendStatus(200);
+            } else {
+                res.status(404).send('Producto no encontrado en el carrito');
+            }
+        } else {
+            res.status(404).send('Carrito no encontrado');
         }
-
-        cart.products = [];
-        cart.totalAmount = 0;
-        await cart.save();
-
-        res.status(200).json({ status: 'success', message: 'Carrito vaciado exitosamente', cart });
     } catch (error) {
-        console.error('Error al vaciar el carrito:', error);
-        res.status(500).json({ status: 'error', message: 'Error interno del servidor' });
+        console.error('Error al quitar el producto del carrito:', error);
+        res.status(500).send('Error interno del servidor');
     }
-};
+});
 
-const calculateTotalAmount = (products) => {
-    return products.reduce((total, product) => total + product.price, 0);
-};
+module.exports = router;

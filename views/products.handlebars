@@ -9,7 +9,10 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ this.name }}</h5>
                     <p class="card-text">Precio: ${{ this.price }}</p>
-                    <button class="btn-add-to-cart" data-producto-id="1">Agregar al carrito</button>
+                    <button class="btn btn-primary btn-add-to-cart" onclick="addToCart(this)">Agregar al
+                        Carrito</button>
+                    <button class="btn btn-danger btn-remove-from-cart" onclick="removeFromCart(this)">Quitar del
+                        Carrito</button>
                 </div>
             </div>
         </div>

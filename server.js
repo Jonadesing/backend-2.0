@@ -9,6 +9,7 @@ const bcrypt = require('bcrypt');
 const flash = require('connect-flash');
 const User = require('./models/userModel');
 const Product = require('./models/productModel');
+const Cart = require('./models/cartModel')
 const ProductManager = require('./dao/productManager'); // Importa ProductManager desde su archivo
 
 // Configuración de variables de entorno
@@ -170,14 +171,38 @@ app.post('/api/cart/add/:productId', async (req, res) => {
         res.status(500).send('Error interno del servidor');
     }
 });
-
+app.get('/carrito', (req, res) => {
+    res.render('cart', { pageTitle: 'Carro de compras', user: req.user });
+});
 
 // Middleware para manejar errores
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).send('Error interno del servidor');
 });
-
+function addToCart(button) {
+    const productCard = button.closest('.product-card');
+    const productId = productCard.getAttribute('data-id');
+    
+    // Aquí puedes hacer una solicitud al servidor para agregar el producto al carrito
+    fetch(`/api/cart/add/${productId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            // Redirigir al carrito después de agregar el producto
+            window.location.href = '/carrito';
+        } else {
+            // Manejar el error
+            alert('Error al agregar el producto al carrito');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+        alert('Error al agregar el producto al carrito');
+    });
+}
 // Conexión a MongoDB
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
